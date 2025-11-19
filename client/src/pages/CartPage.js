@@ -169,6 +169,7 @@ const CartPage = ({ cart, fetchCart, fetchBookings }) => {
                 amount={totalAmount}
                 onSuccess={handlePaymentSuccess}
                 onClose={() => setShowPayment(false)}
+                propertyId={cart.items[0]?.propertyId?._id}
               />
             </div>
           ) : (

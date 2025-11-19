@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function RazorpayPayment({ amount, onSuccess, onClose }) {
+export default function RazorpayPayment({ amount, onSuccess, onClose, propertyId }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -91,7 +91,8 @@ export default function RazorpayPayment({ amount, onSuccess, onClose }) {
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
+                razorpay_signature: response.razorpay_signature,
+                propertyId: propertyId
               })
             });
 
@@ -153,6 +154,32 @@ export default function RazorpayPayment({ amount, onSuccess, onClose }) {
     }
   };
 
+  // Simulate successful payment for test mode
+  const simulateSuccessfulPayment = async () => {
+    setLoading(true);
+    setMessage({ type: 'info', text: 'Processing test payment...' });
+    
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Call the success handler with a test payment ID
+      onSuccess && onSuccess('test_payment_' + Date.now());
+      
+      setMessage({ 
+        type: 'success', 
+        text: 'Test payment successful! Your booking is confirmed.'
+      });
+    } catch (error) {
+      setMessage({ 
+        type: 'error', 
+        text: error.message || 'Test payment failed. Please try again.'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="mt-6 p-6 bg-white rounded-lg shadow-sm border border-gray-200">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Details</h3>
@@ -163,6 +190,19 @@ export default function RazorpayPayment({ amount, onSuccess, onClose }) {
           <span className="font-semibold text-lg">₹{amount?.toLocaleString()}</span>
         </div>
         <p className="text-sm text-gray-500">Secure payment via Razorpay</p>
+        
+        {/* Test mode indicator */}
+        <div className="mt-2 p-2 bg-yellow-100 text-yellow-800 text-xs rounded">
+          <p className="font-semibold">Test Mode</p>
+          <p>Use this button to simulate a successful payment:</p>
+          <button
+            onClick={simulateSuccessfulPayment}
+            disabled={loading}
+            className="mt-2 px-3 py-1 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600 disabled:opacity-50"
+          >
+            {loading ? 'Processing...' : 'Simulate Successful Payment'}
+          </button>
+        </div>
       </div>
 
       {message.text && (

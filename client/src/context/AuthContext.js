@@ -9,12 +9,42 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is logged in
+    // Check if user is logged in and validate token
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     
     if (token && userData) {
-      setUser(JSON.parse(userData));
+      try {
+        // Basic token validation - check if it's a valid JWT format
+        const tokenParts = token.split('.');
+        if (tokenParts.length === 3) {
+          // Decode the payload to check expiration
+          const payload = JSON.parse(atob(tokenParts[1]));
+          const currentTime = Date.now() / 1000;
+          
+          // Check if token is expired
+          if (payload.exp && payload.exp < currentTime) {
+            // Token is expired, clear it
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+          } else {
+            // Token is valid, set user
+            setUser(JSON.parse(userData));
+          }
+        } else {
+          // Invalid token format, clear it
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
+        }
+      } catch (error) {
+        // Error parsing token, clear it
+        console.error('Error validating token:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+      }
     }
     setLoading(false);
   }, []);

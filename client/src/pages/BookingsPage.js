@@ -21,35 +21,11 @@ const BookingCard = ({ booking }) => {
         
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div>
-          <label className="block text-sm text-gray-500">Check-in</label>
-          <p className="font-medium">
-            {new Date(booking.checkIn).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              weekday: 'short'
-            })}
-          </p>
-        </div>
-        <div>
-          <label className="block text-sm text-gray-500">Check-out</label>
-          <p className="font-medium">
-            {new Date(booking.checkOut).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              weekday: 'short'
-            })}
-          </p>
-        </div>
-        <div>
-          <label className="block text-sm text-gray-500">Total Amount</label>
-          <p className="text-xl font-bold text-blue-600">
-            ₹{booking.totalPrice?.toLocaleString() || '0'}
-          </p>
-        </div>
+      <div className="mb-4">
+        <label className="block text-sm text-gray-500">Total Amount</label>
+        <p className="text-xl font-bold text-blue-600">
+          ₹{booking.totalPrice?.toLocaleString() || '0'}
+        </p>
       </div>
       
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-4 border-t border-gray-100">
