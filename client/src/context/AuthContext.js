@@ -62,20 +62,47 @@ export const AuthProvider = ({ children }) => {
 
       console.log('📡 Login response status:', response.status, response.statusText);
 
-      // Check if response is ok before parsing JSON
+      // Check if response has content before parsing
+      const contentType = response.headers.get('content-type');
+      const hasJsonContent = contentType && contentType.includes('application/json');
+      
+      // Check if response is ok
       if (!response.ok) {
-        // Try to parse error message
-        try {
-          const errorData = await response.json();
-          console.error('❌ Login error response:', errorData);
-          return { success: false, error: errorData.message || `Server error: ${response.status}` };
-        } catch (parseError) {
-          console.error('❌ Failed to parse error response:', parseError);
+        // Try to parse error message if there's JSON content
+        if (hasJsonContent) {
+          try {
+            const errorData = await response.json();
+            console.error('❌ Login error response:', errorData);
+            return { success: false, error: errorData.message || `Server error: ${response.status}` };
+          } catch (parseError) {
+            console.error('❌ Failed to parse error response:', parseError);
+            return { success: false, error: `Server error: ${response.status} ${response.statusText}` };
+          }
+        } else {
+          // No JSON content, return status error
+          const text = await response.text();
+          console.error('❌ Login error (non-JSON):', text);
           return { success: false, error: `Server error: ${response.status} ${response.statusText}` };
         }
       }
 
-      const data = await response.json();
+      // Parse successful response
+      let data;
+      if (hasJsonContent) {
+        try {
+          const text = await response.text();
+          console.log('📄 Response text:', text);
+          data = text ? JSON.parse(text) : {};
+        } catch (parseError) {
+          console.error('❌ Failed to parse success response:', parseError);
+          return { success: false, error: 'Invalid response from server' };
+        }
+      } else {
+        const text = await response.text();
+        console.log('📄 Response text (non-JSON):', text);
+        return { success: false, error: 'Server returned invalid response format' };
+      }
+      
       console.log('✅ Login successful:', data);
 
       localStorage.setItem('token', data.token);
@@ -110,20 +137,47 @@ export const AuthProvider = ({ children }) => {
 
       console.log('📡 Register response status:', response.status, response.statusText);
 
-      // Check if response is ok before parsing JSON
+      // Check if response has content before parsing
+      const contentType = response.headers.get('content-type');
+      const hasJsonContent = contentType && contentType.includes('application/json');
+      
+      // Check if response is ok
       if (!response.ok) {
-        // Try to parse error message
-        try {
-          const errorData = await response.json();
-          console.error('❌ Register error response:', errorData);
-          return { success: false, error: errorData.message || `Server error: ${response.status}` };
-        } catch (parseError) {
-          console.error('❌ Failed to parse error response:', parseError);
+        // Try to parse error message if there's JSON content
+        if (hasJsonContent) {
+          try {
+            const errorData = await response.json();
+            console.error('❌ Register error response:', errorData);
+            return { success: false, error: errorData.message || `Server error: ${response.status}` };
+          } catch (parseError) {
+            console.error('❌ Failed to parse error response:', parseError);
+            return { success: false, error: `Server error: ${response.status} ${response.statusText}` };
+          }
+        } else {
+          // No JSON content, return status error
+          const text = await response.text();
+          console.error('❌ Register error (non-JSON):', text);
           return { success: false, error: `Server error: ${response.status} ${response.statusText}` };
         }
       }
 
-      const data = await response.json();
+      // Parse successful response
+      let data;
+      if (hasJsonContent) {
+        try {
+          const text = await response.text();
+          console.log('📄 Response text:', text);
+          data = text ? JSON.parse(text) : {};
+        } catch (parseError) {
+          console.error('❌ Failed to parse success response:', parseError);
+          return { success: false, error: 'Invalid response from server' };
+        }
+      } else {
+        const text = await response.text();
+        console.log('📄 Response text (non-JSON):', text);
+        return { success: false, error: 'Server returned invalid response format' };
+      }
+      
       console.log('✅ Registration successful:', data);
 
       localStorage.setItem('token', data.token);

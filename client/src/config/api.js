@@ -6,9 +6,24 @@
 // For local development: http://localhost:5000/api
 // Note: In production builds, check window.location to determine if we should use hosted API
 const getApiBaseUrl = () => {
+  // Helper function to clean environment variable (in case it includes the variable name)
+  const cleanEnvVar = (value) => {
+    if (!value) return null;
+    // If the value contains "=" and starts with the var name, extract just the URL part
+    if (value.includes('=') && value.includes('REACT_APP_API_URL')) {
+      const parts = value.split('=');
+      if (parts.length > 1) {
+        // Join everything after the first = (in case URL contains =)
+        return parts.slice(1).join('=').trim();
+      }
+    }
+    return value.trim();
+  };
+
   // Always use environment variable if set (highest priority)
-  if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
+  const envApiUrl = cleanEnvVar(process.env.REACT_APP_API_URL);
+  if (envApiUrl && envApiUrl.startsWith('http')) {
+    return envApiUrl;
   }
   
   // Check if we're running on the hosted frontend domain
