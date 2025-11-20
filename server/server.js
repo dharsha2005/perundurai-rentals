@@ -77,6 +77,51 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
+// Root route - API information
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Perundurai Rentals API Server',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      auth: {
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login'
+      },
+      properties: {
+        getAll: 'GET /api/properties',
+        getNearby: 'GET /api/properties/near-perundurai',
+        getById: 'GET /api/properties/:id',
+        create: 'POST /api/properties (requires auth)'
+      },
+      cart: {
+        get: 'GET /api/cart (requires auth)',
+        add: 'POST /api/cart/add (requires auth)',
+        remove: 'DELETE /api/cart/remove/:propertyId (requires auth)'
+      },
+      bookings: {
+        getAll: 'GET /api/bookings (requires auth)',
+        createFromCart: 'POST /api/bookings/from-cart (requires auth)'
+      },
+      payment: {
+        createOrder: 'POST /api/payment/create-order (requires auth)',
+        verify: 'POST /api/payment/verify (requires auth)'
+      }
+    },
+    documentation: 'See API endpoints above',
+    frontend: process.env.FRONTEND_URL || 'https://perundurai-rentals-3.onrender.com'
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
 // User Schema
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
