@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Calendar, CreditCard, Home, CheckCircle } from 'lucide-react';
 import RazorpayPayment from '../components/RazorpayPayment';
+import API_BASE_URL from '../config/api';
 
 const CartPage = ({ cart, fetchCart, fetchBookings }) => {
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,7 @@ const CartPage = ({ cart, fetchCart, fetchBookings }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/cart/remove/${propertyId}`, {
+      const response = await fetch(`${API_BASE_URL}/cart/remove/${propertyId}`, {
         method: 'DELETE',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -53,7 +54,7 @@ const CartPage = ({ cart, fetchCart, fetchBookings }) => {
     try {
       const token = localStorage.getItem('token');
       // Create bookings from cart
-      const bookingResponse = await fetch('http://localhost:5000/api/bookings/from-cart', {
+      const bookingResponse = await fetch(`${API_BASE_URL}/bookings/from-cart`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,

@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import axios from 'axios';
 import QRCodePayment from './QRCodePayment';
+import API_BASE_URL from '../config/api';
 
-// Using relative URL since we have a proxy set up in package.json
-const API_BASE_URL = '/api';  // This will be proxied to http://localhost:5000/api
 console.log('API Base URL:', API_BASE_URL);
 
 // Helper function to make authenticated API calls
@@ -81,7 +80,7 @@ export const usePayment = () => {
   // Test backend connection
   const testBackendConnection = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/payment/test');
+      const response = await fetch(`${API_BASE_URL}/payment/test`);
       const data = await response.json();
       console.log('Backend test response:', data);
       return data.success === true;

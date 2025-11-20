@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../context/AuthContext';
+import API_BASE_URL from '../config/api';
 
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/800x400?text=No+Image';
 
@@ -43,7 +44,7 @@ const PropertyDetails = ({ fetchCart }) => {
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/properties/${id}`);
+        const response = await fetch(`${API_BASE_URL}/properties/${id}`);
         const data = await response.json();
         setProperty(data);
       } catch (error) {
@@ -134,7 +135,7 @@ const PropertyDetails = ({ fetchCart }) => {
         checkOut: leaseEndISO(selectedYear)
       };
 
-      const response = await fetch('http://localhost:5000/api/cart/add', {
+      const response = await fetch(`${API_BASE_URL}/cart/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

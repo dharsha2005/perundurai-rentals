@@ -8,8 +8,7 @@ import CartPage from './pages/CartPage';
 import BookingsPage from './pages/BookingsPage';
 import AddPropertyPage from './pages/AddPropertyPage';
 import { useAuth } from './context/AuthContext';
-
-const API_BASE_URL = 'http://localhost:5000/api';
+import API_BASE_URL from './config/api';
 
 function App() {
   const [properties, setProperties] = useState([]);

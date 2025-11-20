@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropertyForm from '../components/PropertyForm';
+import API_BASE_URL from '../config/api';
 
 const AddPropertyPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -14,7 +15,7 @@ const AddPropertyPage = () => {
         throw new Error('You must be logged in to add a property');
       }
 
-      const response = await fetch('http://localhost:5000/api/properties', {
+      const response = await fetch(`${API_BASE_URL}/properties`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

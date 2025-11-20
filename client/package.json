@@ -29,7 +29,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://localhost:5000",
+  "proxy": "https://perundurai-rentals-server1.onrender.com",
   "eslintConfig": {
     "extends": [
       "react-app",

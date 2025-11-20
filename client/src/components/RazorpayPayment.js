@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import API_BASE_URL from '../config/api';
 
 export default function RazorpayPayment({ amount, onSuccess, onClose, propertyId }) {
   const [loading, setLoading] = useState(false);
@@ -37,7 +38,7 @@ export default function RazorpayPayment({ amount, onSuccess, onClose, propertyId
       }
 
       // Create order on backend
-      const orderResponse = await fetch('http://localhost:5000/api/payment/create-order', {
+      const orderResponse = await fetch(`${API_BASE_URL}/payment/create-order`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -82,7 +83,7 @@ export default function RazorpayPayment({ amount, onSuccess, onClose, propertyId
             setMessage({ type: 'info', text: 'Verifying your payment...' });
             
             // Verify payment on backend
-            const verifyResponse = await fetch('http://localhost:5000/api/payment/verify', {
+            const verifyResponse = await fetch(`${API_BASE_URL}/payment/verify`, {
               method: 'POST',
               headers: { 
                 'Content-Type': 'application/json',
