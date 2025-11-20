@@ -1,10 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Home, Bath, Maximize, ShoppingCart, Phone, Map } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../context/AuthContext';
+
+const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/800x400?text=No+Image';
+
+const normalizeImageSrc = (value) => {
+  if (!value) return PLACEHOLDER_IMAGE;
+  const trimmed = value.trim();
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('data:image')) {
+    return trimmed;
+  }
+  return `data:image/jpeg;base64,${trimmed}`;
+};
 
 // Fix for default marker icons in Leaflet
 const defaultIcon = new L.Icon({
@@ -22,6 +33,7 @@ const PropertyDetails = ({ fetchCart }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [property, setProperty] = useState(null);
+  const [activeImage, setActiveImage] = useState(PLACEHOLDER_IMAGE);
 
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showMap, setShowMap] = useState(true);
@@ -42,6 +54,17 @@ const PropertyDetails = ({ fetchCart }) => {
 
     fetchProperty();
   }, [id]);
+
+  const galleryImages = useMemo(() => {
+    if (!property?.images?.length) {
+      return [PLACEHOLDER_IMAGE];
+    }
+    return property.images.map(normalizeImageSrc);
+  }, [property]);
+
+  useEffect(() => {
+    setActiveImage(galleryImages[0] || PLACEHOLDER_IMAGE);
+  }, [galleryImages]);
 
   const annualPrice = () => {
     if (!property) return 0;
@@ -174,9 +197,9 @@ return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="relative">
         <img
-          src={property.images?.[0] || 'https://via.placeholder.com/800x400?text=No+Image'}
+          src={activeImage}
           alt={property.title}
-          className="w-full h-96 object-cover"
+          className="w-full h-96 object-cover bg-gray-900"
         />
         {property.sold && (
           <div className="absolute top-4 left-4 bg-red-600 text-white px-4 py-2 rounded-full text-lg font-semibold">
@@ -187,6 +210,26 @@ return (
           ₹{Number(property.price || 0).toLocaleString()}/month
         </div>
       </div>
+
+      {galleryImages.length > 1 && (
+        <div className="flex flex-wrap gap-3 p-4 border-t border-gray-100 bg-gray-50">
+          {galleryImages.map((imgSrc, index) => (
+            <button
+              key={`${imgSrc}-${index}`}
+              onClick={() => setActiveImage(imgSrc)}
+              className={`h-20 w-28 rounded-lg overflow-hidden border-2 transition ${
+                imgSrc === activeImage ? 'border-blue-500' : 'border-transparent'
+              }`}
+            >
+              <img
+                src={imgSrc}
+                alt={`Property view ${index + 1}`}
+                className="w-full h-full object-cover"
+              />
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ... rest of the component ... */}
 

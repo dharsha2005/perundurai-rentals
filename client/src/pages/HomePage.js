@@ -5,6 +5,17 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
+const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/400x300?text=No+Image';
+
+const normalizeImageSrc = (value) => {
+  if (!value) return PLACEHOLDER_IMAGE;
+  const trimmed = value.trim();
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('data:image')) {
+    return trimmed;
+  }
+  return `data:image/jpeg;base64,${trimmed}`;
+};
+
 // Fix for default marker icons in Leaflet
 const defaultIcon = new L.Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
@@ -28,7 +39,7 @@ const PropertyCard = ({ property, onView, isActive, onHighlight }) => {
     >
       <div className="relative">
         <img
-          src={property.images[0] || 'https://via.placeholder.com/400x300?text=No+Image'}
+          src={normalizeImageSrc(property.images?.[0])}
           alt={property.title}
           className={`w-full h-56 object-cover transition ${property.sold ? 'grayscale' : 'group-hover:scale-[1.02]'}`}
         />
@@ -429,7 +440,7 @@ const HomePage = ({ properties, setSelectedProperty }) => {
             <>
               <div className="relative">
                 <img
-                  src={selectedProperty.images?.[0] || 'https://via.placeholder.com/600x320?text=Property'}
+                  src={normalizeImageSrc(selectedProperty.images?.[0])}
                   alt={selectedProperty.title}
                   className="w-full h-48 object-cover rounded-xl"
                 />

@@ -24,21 +24,36 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect(
-  process.env.MONGODB_URI ||
-    'mongodb+srv://onlytamilan6_db_user:08-Aug-05@cluster0.irjjr71.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
-  {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  }
-);
+const MONGODB_URI = process.env.MONGODB_URI ||
+  'mongodb+srv://onlytamilan6_db_user:08-Aug-05@cluster0.irjjr71.mongodb.net/perundurai_rentals?retryWrites=true&w=majority&appName=Cluster0';
+
+// Connection options for Mongoose v7
+const connectionOptions = {
+  serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds
+  socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+};
+
+mongoose.connect(MONGODB_URI, connectionOptions);
 
 mongoose.connection.on('connected', () => {
-  console.log('Connected to MongoDB');
+  console.log('✅ Connected to MongoDB Atlas');
+  console.log(`📍 Database: ${mongoose.connection.name}`);
+  console.log(`📍 Host: ${mongoose.connection.host}`);
 });
 
 mongoose.connection.on('error', (err) => {
-  console.error('MongoDB connection error:', err);
+  console.error('❌ MongoDB connection error:', err.message);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('⚠️  MongoDB disconnected');
+});
+
+// Handle app termination
+process.on('SIGINT', async () => {
+  await mongoose.connection.close();
+  console.log('MongoDB connection closed due to app termination');
+  process.exit(0);
 });
 
 // User Schema
@@ -701,7 +716,39 @@ app.post('/api/init-sample-data', async (req, res) => {
   }
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Start the server only after MongoDB connection is established
+const startServer = async () => {
+  try {
+    // Wait for MongoDB connection to be ready
+    if (mongoose.connection.readyState === 1) {
+      // Already connected
+      app.listen(PORT, () => {
+        console.log(`🚀 Server is running on port ${PORT}`);
+      });
+    } else {
+      // Wait for connection
+      await new Promise((resolve, reject) => {
+        if (mongoose.connection.readyState === 1) {
+          resolve();
+        } else {
+          mongoose.connection.once('connected', resolve);
+          mongoose.connection.once('error', reject);
+          
+          // Timeout after 10 seconds
+          setTimeout(() => {
+            reject(new Error('MongoDB connection timeout'));
+          }, 10000);
+        }
+      });
+      
+      app.listen(PORT, () => {
+        console.log(`🚀 Server is running on port ${PORT}`);
+      });
+    }
+  } catch (error) {
+    console.error('❌ Failed to start server:', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
