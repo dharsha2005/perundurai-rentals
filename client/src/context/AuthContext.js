@@ -52,47 +52,97 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('🔐 Attempting login with API:', `${API_BASE_URL}/auth/login`);
+      
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
 
-      const data = await response.json();
+      console.log('📡 Login response status:', response.status, response.statusText);
 
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setUser(data.user);
-        return { success: true };
-      } else {
-        return { success: false, error: data.message };
+      // Check if response is ok before parsing JSON
+      if (!response.ok) {
+        // Try to parse error message
+        try {
+          const errorData = await response.json();
+          console.error('❌ Login error response:', errorData);
+          return { success: false, error: errorData.message || `Server error: ${response.status}` };
+        } catch (parseError) {
+          console.error('❌ Failed to parse error response:', parseError);
+          return { success: false, error: `Server error: ${response.status} ${response.statusText}` };
+        }
       }
+
+      const data = await response.json();
+      console.log('✅ Login successful:', data);
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
+      return { success: true };
     } catch (error) {
-      return { success: false, error: 'Network error. Please try again.' };
+      console.error('❌ Login network error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
+      return { 
+        success: false, 
+        error: error.message.includes('fetch') || error.message.includes('Failed to fetch')
+          ? 'Cannot connect to server. Please check your internet connection and try again.'
+          : error.message || 'Network error. Please try again.' 
+      };
     }
   };
 
   const register = async (userData) => {
     try {
+      console.log('📝 Attempting registration with API:', `${API_BASE_URL}/auth/register`);
+      
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
       });
 
-      const data = await response.json();
+      console.log('📡 Register response status:', response.status, response.statusText);
 
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setUser(data.user);
-        return { success: true };
-      } else {
-        return { success: false, error: data.message };
+      // Check if response is ok before parsing JSON
+      if (!response.ok) {
+        // Try to parse error message
+        try {
+          const errorData = await response.json();
+          console.error('❌ Register error response:', errorData);
+          return { success: false, error: errorData.message || `Server error: ${response.status}` };
+        } catch (parseError) {
+          console.error('❌ Failed to parse error response:', parseError);
+          return { success: false, error: `Server error: ${response.status} ${response.statusText}` };
+        }
       }
+
+      const data = await response.json();
+      console.log('✅ Registration successful:', data);
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
+      return { success: true };
     } catch (error) {
-      return { success: false, error: 'Network error. Please try again.' };
+      console.error('❌ Register network error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
+      return { 
+        success: false, 
+        error: error.message.includes('fetch') || error.message.includes('Failed to fetch')
+          ? 'Cannot connect to server. Please check your internet connection and try again.'
+          : error.message || 'Network error. Please try again.' 
+      };
     }
   };
 

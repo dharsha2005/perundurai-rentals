@@ -23,19 +23,37 @@ const PORT = process.env.PORT || 5000;
 // CORS configuration - Allow requests from frontend
 const allowedOrigins = [
   'https://perundurai-rentals-3.onrender.com',
+  'http://perundurai-rentals-3.onrender.com', // HTTP fallback
   'http://localhost:3000',
+  'http://localhost:3001',
   process.env.FRONTEND_URL
 ].filter(Boolean); // Remove any undefined values
 
+console.log('🔐 CORS Configuration - Allowed Origins:', allowedOrigins);
+
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, or Postman)
-    if (!origin) return callback(null, true);
+    // Log CORS requests for debugging
+    console.log('🌐 CORS check - Origin:', origin);
     
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+    // Allow requests with no origin (like mobile apps, curl, or Postman)
+    if (!origin) {
+      console.log('✅ Allowing request with no origin');
+      return callback(null, true);
+    }
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      console.log('✅ Origin allowed:', origin);
+      callback(null, true);
+    } else if (process.env.NODE_ENV !== 'production') {
+      // In development, allow all origins
+      console.log('✅ Development mode - allowing origin:', origin);
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.log('❌ Origin not allowed:', origin);
+      console.log('Allowed origins:', allowedOrigins);
+      callback(new Error(`Not allowed by CORS. Origin: ${origin} not in allowed list.`));
     }
   },
   credentials: true,
@@ -119,6 +137,17 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
+// API test endpoint (no auth required)
+app.get('/api/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API server is running and accessible',
+    timestamp: new Date().toISOString(),
+    origin: req.get('origin') || 'No origin header',
+    host: req.get('host')
   });
 });
 
